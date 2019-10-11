@@ -18,12 +18,12 @@ namespace IdentityServerAspNetIdentity
     public class Startup
     {
         public IConfiguration Configuration { get; }
-        public IHostingEnvironment Environment { get; }
+        public IHostingEnvironment HostingEnvironment { get; }
 
         public Startup(IConfiguration configuration, IHostingEnvironment environment)
         {
             Configuration = configuration;
-            Environment = environment;
+            HostingEnvironment = environment;
         }
 
         public void ConfigureServices(IServiceCollection services)
@@ -72,29 +72,35 @@ namespace IdentityServerAspNetIdentity
                 })
                 .AddAspNetIdentity<ApplicationUser>();
 
-            if (Environment.IsDevelopment())
+            if (HostingEnvironment.IsDevelopment())
             {
                 builder.AddDeveloperSigningCredential();
             }
             else
             {
+                var signingCert = Environment.GetEnvironmentVariable("SIGNING_KEY");
+                if(string.IsNullOrWhiteSpace(signingCert)) 
+                {
+                    throw new Exception("No Signing Certificate Provided, please ensure SIGNING_KEY is set");
+                }
+
                 throw new Exception("need to configure key material");
             }
 
-            services.AddAuthentication()
-                .AddGoogle(options =>
-                {
-                    // register your IdentityServer with Google at https://console.developers.google.com
-                    // enable the Google+ API
-                    // set the redirect URI to http://localhost:5000/signin-google
-                    options.ClientId = "copy client ID from Google here";
-                    options.ClientSecret = "copy client secret from Google here";
-                });
+            // services.AddAuthentication()
+            //     .AddGoogle(options =>
+            //     {
+            //         // register your IdentityServer with Google at https://console.developers.google.com
+            //         // enable the Google+ API
+            //         // set the redirect URI to http://localhost:5000/signin-google
+            //         options.ClientId = "copy client ID from Google here";
+            //         options.ClientSecret = "copy client secret from Google here";
+            //     });
         }
 
         public void Configure(IApplicationBuilder app)
         {
-            if (Environment.IsDevelopment())
+            if (HostingEnvironment.IsDevelopment())
             {
                 app.UseDeveloperExceptionPage();
                 app.UseDatabaseErrorPage();
@@ -103,7 +109,7 @@ namespace IdentityServerAspNetIdentity
             {
                 app.UseExceptionHandler("/Home/Error");
             }
-
+            
             app.UseStaticFiles();
             app.UseIdentityServer();
             app.UseMvcWithDefaultRoute();
