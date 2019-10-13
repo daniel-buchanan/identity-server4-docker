@@ -56,9 +56,10 @@ namespace IdentityServerAspNetIdentity
                 // this adds the config data from DB (clients, resources)
                 .AddConfigurationStore(options =>
                 {
-                    options.ConfigureDbContext = b =>
+                    options.ConfigureDbContext = b => {
                         b.UseSqlServer(connectionString,
                             sql => sql.MigrationsAssembly(migrationsAssembly));
+                    };
                 })
                 // this adds the operational data from DB (codes, tokens, consents)
                 .AddOperationalStore(options =>
