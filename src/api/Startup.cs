@@ -2,6 +2,7 @@
 using System.Reflection;
 using IdentityServer.Data;
 using IdentityServer.Models;
+using IdentityServerApi.Authorization;
 using IdentityServerApi.Data;
 using IdentityServerApi.Models;
 using IdentityServerApi.Services;
@@ -63,10 +64,12 @@ namespace api
                 .AddEntityFrameworkStores<ApplicationDbContext>()
                 .AddDefaultTokenProviders();
 
-                services.AddSingleton<ISecurityService>(provider => {
-                    var logger = provider.GetRequiredService<ILogger<SecurityService>>();
-                    return new SecurityService(securityOptions, logger);
-                });
+            services.AddSingleton<ISecurityService>(provider => {
+                var logger = provider.GetRequiredService<ILogger<SecurityService>>();
+                return new SecurityService(securityOptions, logger);
+            });
+            
+            services.AddScoped<AuthenticationFilter>();
 
             services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_2);
         }
