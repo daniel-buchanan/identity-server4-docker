@@ -4,6 +4,7 @@ using IdentityServer.Data;
 using IdentityServer.Models;
 using IdentityServerApi.Data;
 using IdentityServerApi.Models;
+using IdentityServerApi.Services;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Identity;
@@ -11,6 +12,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
 
 namespace api
@@ -19,6 +21,7 @@ namespace api
     {
         private const string ConnectionString = "CONNECTION_STRING";
         private const string DbOptions = "DATABASE_OPTIONS";
+        private const string SecurityOptions = "SECURITY_OPTIONS";
 
         public Startup(IConfiguration configuration)
         {
@@ -31,10 +34,15 @@ namespace api
         public void ConfigureServices(IServiceCollection services)
         {
             var connectionString = Environment.GetEnvironmentVariable(ConnectionString);
+            var securityOptionsJson = Environment.GetEnvironmentVariable(SecurityOptions);
 
             if(string.IsNullOrWhiteSpace(connectionString))
                 throw new Exception($"The {ConnectionString} environment variable was not set. Please set it before running.");
 
+            if(string.IsNullOrWhiteSpace(securityOptionsJson))
+                throw new Exception($"The {SecurityOptions} environment variable was not set. Please set it before running.");
+
+            var securityOptions = JsonConvert.DeserializeObject<SecurityOptions>(securityOptionsJson);
             var migrationsAssembly = typeof(Startup).GetTypeInfo().Assembly.GetName().Name;
 
             services.AddDbContext<ApplicationDbContext>(options =>
@@ -53,6 +61,11 @@ namespace api
             services.AddIdentity<ApplicationUser, IdentityRole>()
                 .AddEntityFrameworkStores<ApplicationDbContext>()
                 .AddDefaultTokenProviders();
+
+                services.AddSingleton<ISecurityService>(provider => {
+                    var logger = provider.GetService<ILogger>();
+                    return new SecurityService(securityOptions, logger);
+                });
 
             services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_2);
         }
