@@ -19,6 +19,7 @@ namespace api
 {
     public class Startup
     {
+        private const string EnvErrorFormat = "The {0} environment variable was not set. Please set it before running.";
         private const string ConnectionString = "CONNECTION_STRING";
         private const string DbOptions = "DATABASE_OPTIONS";
         private const string SecurityOptions = "SECURITY_OPTIONS";
@@ -37,10 +38,10 @@ namespace api
             var securityOptionsJson = Environment.GetEnvironmentVariable(SecurityOptions);
 
             if(string.IsNullOrWhiteSpace(connectionString))
-                throw new Exception($"The {ConnectionString} environment variable was not set. Please set it before running.");
+                throw new Exception(string.Format(EnvErrorFormat, ConnectionString));
 
             if(string.IsNullOrWhiteSpace(securityOptionsJson))
-                throw new Exception($"The {SecurityOptions} environment variable was not set. Please set it before running.");
+                throw new Exception(string.Format(EnvErrorFormat, SecurityOptions));
 
             var securityOptions = JsonConvert.DeserializeObject<SecurityOptions>(securityOptionsJson);
             var migrationsAssembly = typeof(Startup).GetTypeInfo().Assembly.GetName().Name;
@@ -63,7 +64,7 @@ namespace api
                 .AddDefaultTokenProviders();
 
                 services.AddSingleton<ISecurityService>(provider => {
-                    var logger = provider.GetService<ILogger>();
+                    var logger = provider.GetRequiredService<ILogger<SecurityService>>();
                     return new SecurityService(securityOptions, logger);
                 });
 
@@ -76,7 +77,7 @@ namespace api
             var dbOptionsJson = Environment.GetEnvironmentVariable(DbOptions);
 
             if(string.IsNullOrWhiteSpace(dbOptionsJson))
-                throw new Exception($"The {DbOptions} environment variable was not set. Please set it before running.");
+                throw new Exception(string.Format(EnvErrorFormat, DbOptions));
 
             var dbOptions = JsonConvert.DeserializeObject<DbConfigurationOptions>(dbOptionsJson);
 
