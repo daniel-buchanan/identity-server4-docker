@@ -16,6 +16,6 @@ namespace IdentityServerApi.Models {
     public enum AccessRole {
         ReadOnly = 0,
         Restricted = 1,
-        Adming = 2
+        Admin = 2
     }
 }
