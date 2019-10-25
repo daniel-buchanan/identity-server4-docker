@@ -17,19 +17,25 @@ namespace IdentityServerApi.Controllers {
         }
 
         [HttpGet("api/resources")]
-        public async Task<Resources> All(bool? enabled, string scope) {
-            if(enabled != true && string.IsNullOrWhiteSpace(scope)) {
+        public async Task<Resources> All(bool? enabled, string scopes) {
+            string[] parts = null;
+
+            if(!string.IsNullOrWhiteSpace(scopes)) {
+                parts = scopes.Split(',', System.StringSplitOptions.None);
+            }
+
+            if(enabled != true && parts == null) {
                 return await _resourceStore.GetAllResourcesAsync();
             }
-            else if (enabled != true && !string.IsNullOrWhiteSpace(scope)) {
-                return await _resourceStore.FindResourcesByScopeAsync(new[] { scope });
+            else if (enabled != true && parts != null) {
+                return await _resourceStore.FindResourcesByScopeAsync(parts);
             }
             
-            if(string.IsNullOrWhiteSpace(scope)) {
+            if(parts == null) {
                 return await _resourceStore.GetAllEnabledResourcesAsync(); 
             }
             else { 
-                return await _resourceStore.FindEnabledResourcesByScopeAsync(new[] { scope });
+                return await _resourceStore.FindEnabledResourcesByScopeAsync(parts);
             }
         }
 
@@ -44,12 +50,18 @@ namespace IdentityServerApi.Controllers {
         }
 
         [HttpGet("api/resources/identity")]
-        public async Task<IEnumerable<IdentityResource>> FindIdentityResourceByScope(bool? enabled, string scope) {
-            if(enabled == true) {
-                return await _resourceStore.FindEnabledIdentityResourcesByScopeAsync(new[] { scope });
+        public async Task<IEnumerable<IdentityResource>> FindIdentityResourceByScope(bool? enabled, string scopes) {
+            string[] parts = null;
+
+            if(!string.IsNullOrWhiteSpace(scopes)) {
+                parts = scopes.Split(',', System.StringSplitOptions.None);
             }
 
-            return await _resourceStore.FindIdentityResourcesByScopeAsync(new[] { scope });
+            if(enabled == true) {
+                return await _resourceStore.FindEnabledIdentityResourcesByScopeAsync(parts);
+            }
+
+            return await _resourceStore.FindIdentityResourcesByScopeAsync(parts);
         }
     }
 }
