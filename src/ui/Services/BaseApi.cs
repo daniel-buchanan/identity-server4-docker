@@ -50,6 +50,19 @@ namespace IdentityServer.Services {
             public string GetValue() {
                 return Convert.ToString(Value);
             }
+
+            public UriParameter() { }
+
+            public UriParameter(string name, T value) {
+                Name = name;
+                Value = value;
+            }
+        }
+
+        protected static class UriParameter {
+            public static IUriParameter Create<T>(string name, T value) {
+                return new UriParameter<T>(name, value);
+            }
         }
     }
 }
