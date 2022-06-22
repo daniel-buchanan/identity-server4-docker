@@ -11,6 +11,6 @@
     <PackageReference Include="Microsoft.AspNetCore.App"/>
     <PackageReference Include="Microsoft.AspNetCore.Razor.Design" Version="2.2.0" PrivateAssets="All"/>
     <PackageReference Include="IdentityServer4.Postgresql" Version="2.0.5"/>
-    <PackageReference Include="Newtonsoft.Json" Version="12.0.2"/>
+    <PackageReference Include="Newtonsoft.Json" Version="13.0.1"/>
   </ItemGroup>
 </Project>
